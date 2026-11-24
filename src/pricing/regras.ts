@@ -27,3 +27,12 @@ export class PrecoCirurgia implements RegraDePreco {
     return PrecoCirurgia.VALOR;
   }
 }
+
+export class PrecoBanhoTosa implements RegraDePreco {
+  private static readonly VALOR = 65;
+  readonly tipo = TipoAtendimento.BANHO_TOSA;
+
+  calcular(): number {
+    return PrecoBanhoTosa.VALOR;
+  }
+}

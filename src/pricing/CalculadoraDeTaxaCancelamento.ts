@@ -5,6 +5,9 @@ export class CalculadoraDeTaxaCancelamento {
     momentoCancelamento: Date,
     planoPetMais: boolean,
   ): number {
+        if (valor <= 0) {
+      throw new Error('Valor inválido');
+    }
     const antecedenciaMin = (inicio.getTime() - momentoCancelamento.getTime()) / 60_000;
 
     let taxa: number;

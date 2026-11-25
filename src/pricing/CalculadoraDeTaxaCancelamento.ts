@@ -5,17 +5,22 @@ export class CalculadoraDeTaxaCancelamento {
     momentoCancelamento: Date,
     planoPetMais: boolean,
   ): number {
-        const antecedenciaMin = (inicio.getTime() - momentoCancelamento.getTime()) / 60_000;
+    const antecedenciaMin = (inicio.getTime() - momentoCancelamento.getTime()) / 60_000;
 
+    let taxa: number;
     if (antecedenciaMin >= 24 * 60) {
-      return 0;
+      taxa = 0;
+    } else if (antecedenciaMin >= 2 * 60) {
+      taxa = valor * 0.3;
+    } else if (antecedenciaMin > 0) {
+      taxa = valor * 0.5;
+    } else {
+      taxa = valor;
     }
-    if (antecedenciaMin >= 2 * 60) {
-      return valor * 0.3;
+
+    if (planoPetMais) {
+      taxa = taxa * 0.5;
     }
-        if (antecedenciaMin > 0) {
-      return valor * 0.5;
-    }
-    return valor;
+    return Math.round(taxa * 100) / 100;
   }
 }

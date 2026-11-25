@@ -13,7 +13,9 @@ export class CalculadoraDeTaxaCancelamento {
     if (antecedenciaMin >= 2 * 60) {
       return valor * 0.3;
     }
-    return valor * 0.5;
-    return 0;
+        if (antecedenciaMin > 0) {
+      return valor * 0.5;
+    }
+    return valor;
   }
 }

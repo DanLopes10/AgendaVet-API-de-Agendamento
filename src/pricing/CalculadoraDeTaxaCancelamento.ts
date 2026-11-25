@@ -1,3 +1,15 @@
+const MS_POR_MINUTO = 60_000;
+const MINUTOS_POR_HORA = 60;
+
+const LIMITE_SEM_TAXA_MIN = 24 * MINUTOS_POR_HORA;
+const LIMITE_TAXA_MEDIA_MIN = 2 * MINUTOS_POR_HORA;
+
+const TAXA_NENHUMA = 0;
+const TAXA_MEDIA = 0.3;
+const TAXA_ALTA = 0.5;
+const TAXA_TOTAL = 1;
+const FATOR_PLANO_PET = 0.5;
+
 export class CalculadoraDeTaxaCancelamento {
   calcular(
     valor: number,
@@ -5,25 +17,21 @@ export class CalculadoraDeTaxaCancelamento {
     momentoCancelamento: Date,
     planoPetMais: boolean,
   ): number {
-        if (valor <= 0) {
+    if (valor <= 0) {
       throw new Error('Valor inválido');
     }
-    const antecedenciaMin = (inicio.getTime() - momentoCancelamento.getTime()) / 60_000;
 
-    let taxa: number;
-    if (antecedenciaMin >= 24 * 60) {
-      taxa = 0;
-    } else if (antecedenciaMin >= 2 * 60) {
-      taxa = valor * 0.3;
-    } else if (antecedenciaMin > 0) {
-      taxa = valor * 0.5;
-    } else {
-      taxa = valor;
-    }
+    const antecedenciaMin = (inicio.getTime() - momentoCancelamento.getTime()) / MS_POR_MINUTO;
+    const fator = planoPetMais ? FATOR_PLANO_PET : 1;
+    const taxa = valor * this.percentual(antecedenciaMin) * fator;
 
-    if (planoPetMais) {
-      taxa = taxa * 0.5;
-    }
     return Math.round(taxa * 100) / 100;
+  }
+
+  private percentual(antecedenciaMin: number): number {
+    if (antecedenciaMin >= LIMITE_SEM_TAXA_MIN) return TAXA_NENHUMA;
+    if (antecedenciaMin >= LIMITE_TAXA_MEDIA_MIN) return TAXA_MEDIA;
+    if (antecedenciaMin > 0) return TAXA_ALTA;
+    return TAXA_TOTAL;
   }
 }

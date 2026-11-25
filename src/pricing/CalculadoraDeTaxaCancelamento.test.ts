@@ -40,5 +40,13 @@ describe('CalculadoraDeTaxaCancelamento', () => {
   it('Plano Pet+ sem taxa continua sem taxa', () => {
     expect(calc.calcular(120, inicio, antes(48), true)).toBe(0);
   });
+
+  it('lança erro quando o valor é zero', () => {
+    expect(() => calc.calcular(0, inicio, antes(48), false)).toThrow('Valor inválido');
+  });
+
+  it('lança erro quando o valor é negativo', () => {
+    expect(() => calc.calcular(-10, inicio, antes(48), false)).toThrow('Valor inválido');
+  });
 });
 

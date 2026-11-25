@@ -9,14 +9,11 @@ export interface NovaConsulta {
   tipo: TipoAtendimento;
   dataHora: Date;
   planoPetMais: boolean;
-  taxaCancelamento?: number;
-  id: number;
-  valor: number;
-  status: StatusConsulta;
 }
 
 export interface Consulta extends NovaConsulta {
   id: number;
   valor: number;
   status: StatusConsulta;
+  taxaCancelamento?: number;
 }

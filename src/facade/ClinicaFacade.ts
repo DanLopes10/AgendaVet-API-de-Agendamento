@@ -12,6 +12,7 @@ export class ClinicaFacade {
     private readonly repositorio: IRepositorioConsultas,
     private readonly calculadora: CalculadoraDePreco,
     private readonly notificador: INotificador,
+    private readonly calculadoraTaxa: CalculadoraDeTaxaCancelamento = new CalculadoraDeTaxaCancelamento(),
   ) {}
 
   agendar(dados: NovaConsulta): Consulta {
@@ -24,16 +25,15 @@ export class ClinicaFacade {
     return consulta;
   }
 
-  cancelar(id: number): Consulta {
+  buscarPorId(id: number): Consulta {
     const consulta = this.repositorio.buscarPorId(id);
     if (!consulta) {
-      throw new Error(`Consulta não encontrada: ${id}`);
+      throw new ConsultaNaoEncontradaError(id);
     }
-    if (consulta.status === 'CANCELADA') {
-      throw new Error(`Consulta já cancelada: ${id}`);
-    }
+    return consulta;
+  }
 
-      cancelar(id: number, agora: Date = new Date()): Consulta {
+  cancelar(id: number, agora: Date = new Date()): Consulta {
     const consulta = this.buscarPorId(id);
     if (consulta.status === 'CANCELADA') {
       throw new ConsultaJaCanceladaError(id);
@@ -48,7 +48,6 @@ export class ClinicaFacade {
     const cancelada: Consulta = { ...consulta, status: 'CANCELADA', taxaCancelamento };
     this.repositorio.atualizar(cancelada);
     return cancelada;
-  }
   }
 
   listar(): Consulta[] {
@@ -87,13 +86,5 @@ export class ClinicaFacade {
 
   private formatarValor(valor: number): string {
     return valor.toFixed(2).replace('.', ',');
-  }
-
-    buscarPorId(id: number): Consulta {
-    const consulta = this.repositorio.buscarPorId(id);
-    if (!consulta) {
-      throw new ConsultaNaoEncontradaError(id);
-    }
-    return consulta;
   }
 }

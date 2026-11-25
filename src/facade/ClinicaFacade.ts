@@ -2,6 +2,8 @@ import { Consulta, NovaConsulta } from '../domain/Consulta';
 import { IRepositorioConsultas } from '../repositories/IRepositorioConsultas';
 import { CalculadoraDePreco } from '../pricing/CalculadoraDePreco';
 import { INotificador } from '../notifications/INotificador';
+import { ConsultaJaCanceladaError, ConsultaNaoEncontradaError } from '../domain/erros';
+import { CalculadoraDeTaxaCancelamento } from '../pricing/CalculadoraDeTaxaCancelamento';
 
 const FORMATO_TELEFONE = /^\d{10,11}$/; // só dígitos, com DDD
 
@@ -10,6 +12,7 @@ export class ClinicaFacade {
     private readonly repositorio: IRepositorioConsultas,
     private readonly calculadora: CalculadoraDePreco,
     private readonly notificador: INotificador,
+    private readonly calculadoraTaxa: CalculadoraDeTaxaCancelamento = new CalculadoraDeTaxaCancelamento(),
   ) {}
 
   agendar(dados: NovaConsulta): Consulta {
@@ -22,16 +25,27 @@ export class ClinicaFacade {
     return consulta;
   }
 
-  cancelar(id: number): Consulta {
+  buscarPorId(id: number): Consulta {
     const consulta = this.repositorio.buscarPorId(id);
     if (!consulta) {
-      throw new Error(`Consulta não encontrada: ${id}`);
+      throw new ConsultaNaoEncontradaError(id);
     }
+    return consulta;
+  }
+
+  cancelar(id: number, agora: Date = new Date()): Consulta {
+    const consulta = this.buscarPorId(id);
     if (consulta.status === 'CANCELADA') {
-      throw new Error(`Consulta já cancelada: ${id}`);
+      throw new ConsultaJaCanceladaError(id);
     }
 
-    const cancelada: Consulta = { ...consulta, status: 'CANCELADA' };
+    const taxaCancelamento = this.calculadoraTaxa.calcular(
+      consulta.valor,
+      consulta.dataHora,
+      agora,
+      consulta.planoPetMais,
+    );
+    const cancelada: Consulta = { ...consulta, status: 'CANCELADA', taxaCancelamento };
     this.repositorio.atualizar(cancelada);
     return cancelada;
   }

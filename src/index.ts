@@ -1,49 +1,8 @@
-import { ZapLegacySDK } from './libs/zap-legacy-sdk';
-import { TipoAtendimento } from './domain/TipoAtendimento';
-import { CalculadoraDePreco } from './pricing/CalculadoraDePreco';
-import { PrecoConsulta, PrecoVacina, PrecoCirurgia, PrecoBanhoTosa } from './pricing/regras';
-import { RepositorioEmMemoria } from './repositories/RepositorioEmMemoria';
-import { ZapAdapter } from './notifications/ZapAdapter';
-import { ClinicaFacade } from './facade/ClinicaFacade';
+import { criarApp } from './app';
+import { montarFacade } from './montagem';
 
+const PORTA = 3000;
 
-const calculadora = new CalculadoraDePreco([
-  new PrecoConsulta(),
-  new PrecoVacina(),
-  new PrecoCirurgia(),
-  new PrecoBanhoTosa(),
-]);
-const repositorio = new RepositorioEmMemoria();
-const notificador = new ZapAdapter(new ZapLegacySDK('TOKEN-123'));
-
-const clinica = new ClinicaFacade(repositorio, calculadora, notificador);
-
-
-clinica.agendar({
-  tutor: 'Danilo',
-  telefone: '31999990000',
-  pet: 'Thor',
-  tipo: TipoAtendimento.CONSULTA,
-  dataHora: new Date(2027, 0, 10, 14, 0),
-  planoPetMais: false,
+criarApp(montarFacade()).listen(PORTA, () => {
+  console.log(`AgendaVet em http://localhost:${PORTA}`);
 });
-
-clinica.agendar({
-  tutor: 'Bruno',
-  telefone: '31988887777',
-  pet: 'Mel',
-  tipo: TipoAtendimento.VACINA,
-  dataHora: new Date(2027, 0, 11, 9, 30),
-  planoPetMais: true,
-});
-
-clinica.agendar({
-  tutor: 'Gabriela',
-  telefone: '31977776666',
-  pet: 'Luna',
-  tipo: TipoAtendimento.BANHO_TOSA,
-  dataHora: new Date(2027, 0, 12, 16, 0),
-  planoPetMais: false,
-});
-
-console.log(clinica.listar());

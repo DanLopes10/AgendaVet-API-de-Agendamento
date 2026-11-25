@@ -40,6 +40,15 @@ describe('ClinicaFacade', () => {
     expect(notificador.enviar).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['pet vazio', { pet: '  ' }, 'Pet é obrigatório'],
+    ['telefone com letras', { telefone: '31abc' }, 'Telefone inválido'],
+    ['data inválida', { dataHora: new Date('xyz') }, 'Data e hora inválidas'],
+  ])('rejeita %s sem notificar', (_caso, alteracao, mensagem) => {
+    expect(() => facade.agendar({ ...dados, ...alteracao })).toThrow(mensagem);
+    expect(notificador.enviar).not.toHaveBeenCalled();
+  });
+
   it('aplica 20% de desconto do Plano Pet+ (R$ 96)', () => {
     const consulta = facade.agendar({ ...dados, planoPetMais: true });
     expect(consulta.valor).toBe(96);

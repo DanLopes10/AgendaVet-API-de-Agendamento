@@ -48,4 +48,20 @@ describe('ClinicaFacade', () => {
   it('lança erro ao cancelar consulta inexistente', () => {
     expect(() => facade.cancelar(999)).toThrow('Consulta não encontrada');
   });
+
+    it('cancela com taxa calculada pela antecedência', () => {
+    const consulta = facade.agendar(dados);
+    const umaHoraAntes = new Date(dados.dataHora.getTime() - 60 * 60_000);
+
+    const cancelada = facade.cancelar(consulta.id, umaHoraAntes);
+
+    expect(cancelada.status).toBe('CANCELADA');
+    expect(cancelada.taxaCancelamento).toBe(60);
+  });
+
+  it('lança erro ao cancelar duas vezes a mesma consulta', () => {
+    const consulta = facade.agendar(dados);
+    facade.cancelar(consulta.id);
+    expect(() => facade.cancelar(consulta.id)).toThrow('já cancelada');
+  });
 });

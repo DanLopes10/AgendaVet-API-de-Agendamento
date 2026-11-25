@@ -5,6 +5,11 @@ export class CalculadoraDeTaxaCancelamento {
     momentoCancelamento: Date,
     planoPetMais: boolean,
   ): number {
+    const antecedenciaMin = (inicio.getTime() - momentoCancelamento.getTime()) / 60_000;
+
+    if (antecedenciaMin < 24 * 60) {
+      return valor * 0.3;
+    }
     return 0;
   }
 }
